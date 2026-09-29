@@ -1,0 +1,426 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Tajawal', system-ui, sans-serif;
+
+  /* Brand */
+  --color-brand: #c9973f;
+  --color-brand-50: #fbf5e9;
+  --color-brand-100: #f2dfb5;
+  --color-brand-600: #a67c2e;
+  --color-brand-900: #5c4218;
+
+  /* Surfaces */
+  --color-canvas: #fafaf8;
+  --color-surface: #f4f2ee;
+  --color-card: #ffffff;
+
+  /* Ink */
+  --color-ink: #1a1614;
+  --color-ink-soft: #4a4540;
+  --color-muted: #6d6761;
+
+  /* Borders */
+  --color-border: #e8e4dc;
+  --color-border-strong: #ccc9c2;
+
+  /* Semantic */
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+}
+
+html {
+  direction: rtl;
+  scroll-behavior: smooth;
+  --app-safe-top: env(safe-area-inset-top);
+  --app-safe-bottom: env(safe-area-inset-bottom);
+}
+
+/* Android has already applied the real system-bar insets to the WebView container. */
+html.native-android {
+  --app-safe-top: 0px;
+  --app-safe-bottom: 0px;
+  font-size: 15px;
+}
+
+body {
+  font-family: 'Tajawal', system-ui, sans-serif;
+  background-color: #fafaf8;
+  color: #1a1614;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #8b611e;
+  outline-offset: 2px;
+}
+
+input::placeholder, textarea::placeholder { color: #625d57; opacity: 1; }
+nav[aria-label='التنقل السفلي'] button[aria-current='page'] { color: #795d25; }
+
+/* Touch targets: 48px minimum on touch-sized screens.
+   These live in `@layer base` on purpose — as unlayered rules they outranked
+   every Tailwind utility, which is what turned 32px icon buttons, chips and
+   the showcase dots into 48px blobs on phones. In the base layer a utility
+   like `w-8 h-8` or `.case-dot` can shrink them again where the design needs
+   a smaller control that still sits inside a large enough hit area. */
+@layer base {
+  @media (max-width: 760px) {
+    button, input, select, textarea { min-height: 48px; }
+    button { min-width: 48px; }
+    button:active { filter: brightness(0.92); }
+  }
+}
+
+.store-search-input::-webkit-search-cancel-button,
+.store-search-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Smooth transitions */
+.page-transition {
+  animation: pageIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Display typography (from reference designs) ────────── */
+.display-xl {
+  font-size: clamp(2.4rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.hero-mobile-title {
+  max-width: 100%;
+  font-size: clamp(32px, 9.5vw, 40px);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 640px) {
+  .hero-mobile-title {
+    font-size: clamp(2.4rem, 6vw, 5rem);
+    line-height: 1.05;
+  }
+}
+
+.display-lg {
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+/* Ghost word behind products (TSSF "RUNNING" / Modu "CHAIRS") */
+.ghost-word {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  color: transparent;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Each repeated set covers at least a viewport, so the announcement never leaves a blank frame. */
+.announcement-strip { height: 48px; overflow: hidden; background: #1a1614; color: #fff; }
+.marquee-track { display: flex; width: max-content; height: 100%; animation: marquee 24s linear infinite; }
+.marquee-set { display: flex; align-items: stretch; justify-content: space-around; gap: 24px; min-width: 100vw; padding-inline: 12px; flex: none; }
+.marquee-set button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; flex: none; white-space: nowrap; color: #fff; font-size: 12px; font-weight: 600; }
+.marquee-set button:focus-visible { outline-color: #e9bf77; outline-offset: -3px; }
+.announcement-strip:hover .marquee-track, .announcement-strip:focus-within .marquee-track { animation-play-state: paused; }
+
+/* Stagger reveal children. Delays are capped at 8 children; longer grids keep
+   the first eight staggered and reveal the rest immediately, which reads better
+   than a queue that keeps growing down a 20-item catalogue. */
+.stagger > * {
+  animation: fadeUp var(--m-slow) var(--e-out) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger > *:nth-child(2) { animation-delay: 0.12s; }
+.stagger > *:nth-child(3) { animation-delay: 0.19s; }
+.stagger > *:nth-child(4) { animation-delay: 0.26s; }
+.stagger > *:nth-child(5) { animation-delay: 0.33s; }
+.stagger > *:nth-child(6) { animation-delay: 0.4s; }
+.stagger > *:nth-child(7) { animation-delay: 0.47s; }
+.stagger > *:nth-child(8) { animation-delay: 0.54s; }
+/* Children past the eighth start together with the eighth rather than at 0. */
+.stagger > *:nth-child(n + 9) { animation-delay: 0.54s; }
+
+/* Soft breathing pulse for CTAs */
+@keyframes pulseSoft {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 151, 63, 0.35); }
+  50%      { box-shadow: 0 0 0 10px rgba(201, 151, 63, 0); }
+}
+.animate-pulse-soft { animation: pulseSoft 2.4s ease-in-out infinite; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Page / entrance motion ─────────────────────────────── */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up {
+  animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.fade-up-1 { animation-delay: 0.08s; }
+.fade-up-2 { animation-delay: 0.18s; }
+.fade-up-3 { animation-delay: 0.3s; }
+
+/* ── Floating product on a colour panel ─────────────────── */
+
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.6); }
+  70%  { transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-pop {
+  animation: popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Gentle infinite marquee for promo strips */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f4f2ee 25%, #e8e4dc 50%, #f4f2ee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #e8e4dc; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #c9973f; }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid #c9973f;
+  outline-offset: 2px;
+}
+
+/* Line clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Number input hide arrows */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type=number] { -moz-appearance: textfield; }
+
+/* Hide scrollbar for pill rows */
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* ── "3D" floating product (no background) ─────────────── */
+/* Product photo on a light background: dissolve the backdrop so only the object
+   appears to float above the coloured panel. Whole-pixel transforms + contrast
+   rendering keep the cut-out edge crisp instead of mushy. */
+.product-float {
+  mix-blend-mode: multiply;
+  filter: contrast(1.04) saturate(1.06);
+  image-rendering: -webkit-optimize-contrast;
+}
+.studio-chair-cutout {
+  mix-blend-mode: normal;
+  filter: none;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Motion system — three durations, one curve, nothing else.
+   Every new animation should pick from these instead of inventing
+   its own timing, so the whole store moves to one rhythm.
+
+     --m-fast   0.18s  micro feedback (press, chip, icon)
+     --m-base   0.35s  state changes (hover, tab, colour)
+     --m-slow   0.6s   entrance / layout moves
+
+     --e-out  decelerate — things arriving
+   ════════════════════════════════════════════════════════════ */
+:root {
+  --m-fast: 0.18s;
+  --m-base: 0.35s;
+  --m-slow: 0.6s;
+  --e-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Crisper edges for floating cut-outs. `multiply` is kept only where the
+   source is a true white-background JPEG (`.product-float`). */
+.product-crisp {
+  image-rendering: -webkit-optimize-contrast;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* ── 3D case showcase ───────────────────────────────────── */
+.case-card { perspective: 1000px; cursor: pointer; }
+.case-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform var(--m-base) var(--e-out), box-shadow var(--m-base) var(--e-out);
+}
+.case-card:hover .case-inner { transform: translateY(-8px); box-shadow: 0 30px 60px -30px rgba(26, 22, 20, 0.5); }
+.case-card[aria-pressed='true'] .case-inner { box-shadow: 0 0 0 2px var(--color-brand), 0 30px 60px -30px rgba(26, 22, 20, 0.45); }
+.case-shine {
+  background: radial-gradient(circle at var(--sx, 50%) var(--sy, 0%), rgba(255, 255, 255, 0.5), transparent 55%);
+  opacity: 0;
+  transition: opacity var(--m-base) var(--e-out);
+}
+/* `.group` is Tailwind's plain marker class, so a card that opts into a group
+   hover (ProductCard) gets the same sheen without duplicating the rule. */
+.case-card:hover .case-shine,
+.case-card:focus-visible .case-shine,
+.group:hover .case-shine,
+.group:focus-within .case-shine { opacity: 0.7; }
+
+/* Dot indicators: the visible bar stays 4px while the tap target stays 44px —
+   `background-clip: content-box` is what lets both live on one element. */
+.case-dot {
+  flex: none;
+  width: 1.5rem;
+  min-width: 1.5rem;
+  height: 44px;
+  min-height: 44px;
+  padding: 20px 0;
+  border-radius: 999px;
+  background-color: #ccc9c2;
+  background-clip: content-box;
+  transition: width var(--m-base) var(--e-out), background-color var(--m-base) var(--e-out);
+}
+.case-dot[aria-current='true'] { width: 2.75rem; background-color: var(--color-ink); }
+
+/* ── Tilt wrapper ───────────────────────────────────────── */
+.tilt-wrap { transform-style: preserve-3d; }
+.tilt-layer { position: relative; transform-style: preserve-3d; will-change: transform; }
+.tilt-shift { transform-style: preserve-3d; }
+.tilt-gloss {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.42), transparent 62%),
+    linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.55) 50%, transparent 68%);
+  background-size: 100% 100%, 240% 100%;
+  background-position: 50% 50%, 50% 50%;
+  background-repeat: no-repeat;
+  mix-blend-mode: soft-light;
+  transition: opacity var(--m-base) var(--e-out);
+}
+
+/* ── Entrance helpers (used with the useReveal hook) ────── */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity var(--m-slow) var(--e-out), transform var(--m-slow) var(--e-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal-up.is-visible { opacity: 1; transform: none; }
+
+.anim-fade-in { animation: fadeIn var(--m-fast) var(--e-out) both; }
+.anim-pop-in { animation: popIn var(--m-base) var(--e-out) both; }
+.anim-sheet-up {
+  animation: slideUp var(--m-base) var(--e-out) both;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Product detail entrance after the shared-element flight ── */
+.pdp-enter { animation: pdpIn var(--m-slow) var(--e-out) both; }
+.pdp-enter-1 { animation-delay: 0.06s; }
+.pdp-enter-2 { animation-delay: 0.14s; }
+.pdp-enter-3 { animation-delay: 0.22s; }
+@keyframes pdpIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Press feedback that does not thrash paint: only CTAs opt in. */
+.press { transition: transform var(--m-fast) var(--e-out); }
+.press:active { transform: scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --m-fast: 0.01ms; --m-base: 0.01ms; --m-slow: 0.01ms; }
+  .reveal-up { opacity: 1; transform: none; }
+}

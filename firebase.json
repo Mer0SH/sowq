@@ -1,0 +1,19 @@
+{
+  "functions": [{ "source": "functions", "codebase": "souq" }],
+  "firestore": { "rules": "firestore.rules" },
+  "storage": { "rules": "storage.rules" },
+  "emulators": {
+    "firestore": { "host": "127.0.0.1", "port": 8099 },
+    "functions": { "host": "127.0.0.1", "port": 5002 },
+    "ui": { "enabled": true, "port": 4002 }
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "predeploy": ["pnpm build:online"],
+    "rewrites": [
+      { "source": "/api/**", "function": { "functionId": "api", "region": "me-central1" } },
+      { "source": "**", "destination": "/index.html" }
+    ]
+  }
+}

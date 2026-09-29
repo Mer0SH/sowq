@@ -1,0 +1,245 @@
+/* The team space has its own palette, independent of the storefront. */
+.admin-root {
+  --a-muted: #626d5e;
+  font-weight: 500;
+}
+.admin-root .admin-heading p,
+.admin-root .admin-card-heading p,
+.admin-root .admin-stat p,
+.admin-root .admin-quick-actions p,
+.admin-root .admin-recent-list small,
+.admin-root .admin-role-card small,
+.admin-root .admin-user small,
+.admin-root .admin-nav-caption,
+.admin-root .admin-sidebar-brand > span,
+.admin-root .admin-page-footer,
+.admin-root .admin-count,
+.admin-root .admin-field small,
+.admin-root .admin-help,
+.admin-root .commerce-note,
+.admin-root .commerce-list-item small,
+.admin-root .admin-product-tile small,
+.admin-root .admin-product-detail > p {
+  color: #626d5e;
+  font-size: 12px;
+  font-weight: 500;
+}
+.admin-root .admin-sidebar nav button,
+.admin-root .admin-store-link,
+.admin-root .admin-topbar,
+.admin-root .admin-stat > div,
+.admin-root .admin-quick-actions button,
+.admin-root .admin-text-btn,
+.admin-root .admin-recent-list strong,
+.admin-root td,
+.admin-root .admin-search input,
+.admin-root .admin-filter {
+  font-weight: 600;
+}
+.admin-root .admin-sidebar nav button { color: #505b4b; }
+.admin-root .admin-stat > div,
+.admin-root .admin-store-link,
+.admin-root .admin-quick-actions button { color: #53614b; }
+.admin-root .admin-page-footer { font-size: 11px; }
+.admin-root .admin-theme-toggle { color: #536747; }
+.admin-login-theme { margin-bottom: 24px; }
+
+.admin-root[data-theme='dark'] {
+  --a-ink: #edf0e8;
+  --a-muted: #b5bfb0;
+  --a-line: #3b473a;
+  --a-gold: #d7b47a;
+  --a-bg: #1a201b;
+  --a-green: #b4c79a;
+  color-scheme: dark;
+}
+.admin-root[data-theme='dark'] .admin-sidebar,
+.admin-root[data-theme='dark'] .admin-login-panel { background: #202720; }
+.admin-root[data-theme='dark'] .admin-topbar { background: #202720e8; }
+.admin-root[data-theme='dark'] .admin-card,
+.admin-root[data-theme='dark'] .admin-stat,
+.admin-root[data-theme='dark'] .commerce-card,
+.admin-root[data-theme='dark'] .admin-inventory-filters,
+.admin-root[data-theme='dark'] .admin-product-detail,
+.admin-root[data-theme='dark'] .admin-product-tile,
+.admin-root[data-theme='dark'] .commerce-list-item,
+.admin-root[data-theme='dark'] .admin-dialog,
+.admin-root[data-theme='dark'] .admin-dialog > header {
+  background: #252d25;
+  border-color: var(--a-line);
+  color: var(--a-ink);
+}
+.admin-root[data-theme='dark'] .admin-login-story { background: #2a3529; }
+.admin-root[data-theme='dark'] .admin-heading p,
+.admin-root[data-theme='dark'] .admin-card-heading p,
+.admin-root[data-theme='dark'] .admin-stat p,
+.admin-root[data-theme='dark'] .admin-quick-actions p,
+.admin-root[data-theme='dark'] .admin-recent-list small,
+.admin-root[data-theme='dark'] .admin-role-card small,
+.admin-root[data-theme='dark'] .admin-user small,
+.admin-root[data-theme='dark'] .admin-nav-caption,
+.admin-root[data-theme='dark'] .admin-sidebar-brand > span,
+.admin-root[data-theme='dark'] .admin-page-footer,
+.admin-root[data-theme='dark'] .admin-count,
+.admin-root[data-theme='dark'] .admin-field small,
+.admin-root[data-theme='dark'] .admin-help,
+.admin-root[data-theme='dark'] .commerce-note,
+.admin-root[data-theme='dark'] .commerce-list-item small,
+.admin-root[data-theme='dark'] .admin-product-tile small,
+.admin-root[data-theme='dark'] .admin-product-detail > p,
+.admin-root[data-theme='dark'] .admin-today,
+.admin-root[data-theme='dark'] .admin-login-card > p,
+.admin-root[data-theme='dark'] .admin-login-footer,
+.admin-root[data-theme='dark'] .admin-product-detail dt,
+.admin-root[data-theme='dark'] .admin-inventory-results-title span,
+.admin-root[data-theme='dark'] .admin-inventory-results-title small,
+.admin-root[data-theme='dark'] .admin-product-detail-title span,
+.admin-root[data-theme='dark'] .admin-detail-summary small,
+.admin-root[data-theme='dark'] .admin-readonly small,
+.admin-root[data-theme='dark'] .admin-timeline p,
+.admin-root[data-theme='dark'] .admin-timeline small,
+.admin-root[data-theme='dark'] .admin-media-section small {
+  color: #b5c1af;
+}
+.admin-root[data-theme='dark'] .admin-role-card,
+.admin-root[data-theme='dark'] .admin-quick-actions,
+.admin-root[data-theme='dark'] .admin-phase-note,
+.admin-root[data-theme='dark'] .admin-detail-summary,
+.admin-root[data-theme='dark'] .admin-readonly,
+.admin-root[data-theme='dark'] .commerce-repeat,
+.admin-root[data-theme='dark'] .admin-audit-json {
+  background: #2d372b;
+  border-color: #45513e;
+  color: var(--a-ink);
+}
+.admin-root[data-theme='dark'] .admin-role-icon,
+.admin-root[data-theme='dark'] .admin-list-icon,
+.admin-root[data-theme='dark'] .admin-avatar,
+.admin-root[data-theme='dark'] .admin-stat-icon.gold,
+.admin-root[data-theme='dark'] .admin-stat-icon.orange,
+.admin-root[data-theme='dark'] .admin-stat-icon.rose {
+  background: #394634;
+  color: #e1bd83;
+}
+.admin-root[data-theme='dark'] .admin-sidebar nav button,
+.admin-root[data-theme='dark'] .admin-store-link,
+.admin-root[data-theme='dark'] .admin-stat > div,
+.admin-root[data-theme='dark'] .admin-topbar,
+.admin-root[data-theme='dark'] .admin-topbar b,
+.admin-root[data-theme='dark'] .admin-quick-actions button,
+.admin-root[data-theme='dark'] .admin-filter,
+.admin-root[data-theme='dark'] .admin-field,
+.admin-root[data-theme='dark'] .admin-product-tile .price,
+.admin-root[data-theme='dark'] .admin-inventory-filter-title,
+.admin-root[data-theme='dark'] .admin-inventory-filter-group > strong {
+  color: #dce5d5;
+}
+.admin-root[data-theme='dark'] .admin-inventory-filter-group button,
+.admin-root[data-theme='dark'] .admin-product-tile footer span,
+.admin-root[data-theme='dark'] .admin-product-detail-description,
+.admin-root[data-theme='dark'] .admin-media-card button,
+.admin-root[data-theme='dark'] .admin-pagination,
+.admin-root[data-theme='dark'] .admin-search,
+.admin-root[data-theme='dark'] .admin-empty,
+.admin-root[data-theme='dark'] .admin-empty h3,
+.admin-root[data-theme='dark'] .admin-empty p,
+.admin-root[data-theme='dark'] .admin-photo-empty {
+  color: #b9c7b2;
+}
+.admin-root[data-theme='dark'] .admin-sidebar nav button:hover,
+.admin-root[data-theme='dark'] .admin-icon:hover,
+.admin-root[data-theme='dark'] .admin-recent-list > button:hover,
+.admin-root[data-theme='dark'] .commerce-list-item:hover,
+.admin-root[data-theme='dark'] .admin-product-tile:hover,
+.admin-root[data-theme='dark'] .admin-inventory-filter-group button:hover {
+  background: #33402f;
+}
+.admin-root[data-theme='dark'] .admin-sidebar nav button.active,
+.admin-root[data-theme='dark'] .admin-inventory-filter-group button.active {
+  background: #3b4a36;
+  color: #f1f4e9;
+}
+.admin-root[data-theme='dark'] .admin-btn { background: #a4b987; border-color: #a4b987; color: #172017; }
+.admin-root[data-theme='dark'] .admin-btn:hover { background: #bfd0a6; }
+.admin-root[data-theme='dark'] .admin-btn.secondary,
+.admin-root[data-theme='dark'] .admin-icon.bordered,
+.admin-root[data-theme='dark'] .admin-quick-actions button,
+.admin-root[data-theme='dark'] .admin-dense-btn,
+.admin-root[data-theme='dark'] .commerce-editor-tabs button,
+.admin-root[data-theme='dark'] .admin-filter {
+  background: #303a2e;
+  border-color: #4a5845;
+  color: #e3eadc;
+}
+.admin-root[data-theme='dark'] .admin-text-btn,
+.admin-root[data-theme='dark'] .admin-theme-toggle,
+.admin-root[data-theme='dark'] .admin-icon,
+.admin-root[data-theme='dark'] .admin-stock-low,
+.admin-root[data-theme='dark'] .admin-product-detail-price strong {
+  color: #e2bc80;
+}
+.admin-root[data-theme='dark'] .admin-recent-list > button,
+.admin-root[data-theme='dark'] .admin-page-footer,
+.admin-root[data-theme='dark'] .admin-form-actions,
+.admin-root[data-theme='dark'] .admin-media-section,
+.admin-root[data-theme='dark'] .admin-product-detail dl,
+.admin-root[data-theme='dark'] .admin-inventory-filter-title,
+.admin-root[data-theme='dark'] .admin-inventory-filter-group,
+.admin-root[data-theme='dark'] .admin-product-tile footer,
+.admin-root[data-theme='dark'] .admin-user {
+  border-color: var(--a-line);
+}
+.admin-root[data-theme='dark'] th,
+.admin-root[data-theme='dark'] .admin-dialog th { background: #303a2f; border-color: var(--a-line); color: #c8d3c1; }
+.admin-root[data-theme='dark'] td,
+.admin-root[data-theme='dark'] .admin-dialog td { border-color: var(--a-line); color: #d7dfd1; }
+.admin-root[data-theme='dark'] td strong { color: #f0f2e9; }
+.admin-root[data-theme='dark'] tbody tr:hover { background: #303a2f; }
+.admin-root[data-theme='dark'] .admin-field input,
+.admin-root[data-theme='dark'] .admin-field select,
+.admin-root[data-theme='dark'] .admin-field textarea,
+.admin-root[data-theme='dark'] .commerce-card input,
+.admin-root[data-theme='dark'] .commerce-card textarea,
+.admin-root[data-theme='dark'] .commerce-card select,
+.admin-root[data-theme='dark'] .admin-search,
+.admin-root[data-theme='dark'] .admin-search input {
+  background: #1e251f;
+  border-color: #485644;
+  color: #f2f3ec;
+}
+.admin-root[data-theme='dark'] input::placeholder,
+.admin-root[data-theme='dark'] textarea::placeholder { color: #aab6a4; }
+.admin-root[data-theme='dark'] .admin-product-photo,
+.admin-root[data-theme='dark'] .commerce-preview,
+.admin-root[data-theme='dark'] .commerce-preview-section,
+.admin-root[data-theme='dark'] .commerce-preview-mini > div,
+.admin-root[data-theme='dark'] .admin-media-card,
+.admin-root[data-theme='dark'] .commerce-image-preview {
+  background: #303930;
+  border-color: var(--a-line);
+}
+.admin-root[data-theme='dark'] .commerce-preview-hero:not(.dark) .commerce-pill { background: #283427; color: #fff; }
+.admin-root[data-theme='dark'] .commerce-editor-tabs button.active { background: #8fa877; color: #172017; }
+.admin-root[data-theme='dark'] .admin-badge.status-new { background: #4c422c; color: #f1cf86; }
+.admin-root[data-theme='dark'] .admin-badge.status-processing { background: #374537; color: #c5dfb8; }
+.admin-root[data-theme='dark'] .admin-badge.status-shipped { background: #4b4434; color: #e5ce9c; }
+.admin-root[data-theme='dark'] .admin-badge.status-delivered { background: #354b37; color: #c3e0b7; }
+.admin-root[data-theme='dark'] .admin-badge.status-cancelled { background: #4b3c38; color: #e6b8a7; }
+.admin-root[data-theme='dark'] .admin-alert.error { background: #4a342f; color: #ffd0bf; }
+.admin-root[data-theme='dark'] .admin-alert.success { background: #314a33; color: #c9e8bc; }
+.admin-root[data-theme='dark'] .admin-media-upload { background: #334231; border-color: #728b69; color: #d9ead0; }
+.admin-root[data-theme='dark'] .commerce-pill { background: #3b4d34; color: #d7edca; }
+.admin-root[data-theme='dark'] .commerce-pill.off { background: #3d443d; color: #c0c9bb; }
+.admin-root[data-theme='dark'] .admin-product-tile-top > span { background: #4a3d2e; color: #f0ca90; }
+.admin-root[data-theme='dark'] .admin-inventory-empty { border-color: #4a5845; color: #c2cdbc; }
+.admin-root[data-theme='dark'] .admin-dialog::backdrop { background: #080d09ad; }
+
+/* Storefront preview always shows its selected advertisement treatment. */
+.admin-root[data-theme='dark'] .commerce-preview-hero:not(.dark) { background: #ecebe3; color: #272820; }
+.admin-root[data-theme='dark'] .commerce-preview-hero.dark { background: radial-gradient(circle at 52% 35%, #37584a 0%, #253e32 45%, #17281f 100%); color: #fff; }
+.admin-root[data-theme='dark'] .commerce-preview-hero:not(.dark) p { color: #50584d; }
+
+@media(max-width:760px) {
+  .admin-root .admin-stat p { font-size: 11px; }
+  .admin-root .admin-page-footer { font-size: 10px; }
+}

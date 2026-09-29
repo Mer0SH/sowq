@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">سوق</string>
+    <string name="title_activity_main">سوق</string>
+    <string name="package_name">com.souq.store</string>
+    <string name="custom_url_scheme">com.souq.store</string>
+</resources>

@@ -1,0 +1,10 @@
+{
+  "description": "متجر إلكتروني عربي متجاوب يقدم تجربة تسوق سلسة ومميزة للجمهور الخليجي مع تصميم أنيق وواجهة مستخدم سهلة الاستخدام وميزات متقدمة.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
