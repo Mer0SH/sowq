@@ -91,7 +91,7 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
   const mImgRef = useRef<HTMLDivElement>(null);
   const doneRef = useRef<HTMLDivElement>(null);
 
-  const st = useRef({ target: 0, current: reduced ? 0 : 90, radius: 0, raf: 0, paused: false, active: -1 });
+  const st = useRef({ target: 0, current: reduced ? 0 : 90, radius: 0, raf: 0, paused: false, active: -1, draggingMouse: false });
 
   /* ── Ring layout + render loop (lerp → buttery) ── */
   const layout = useCallback(() => {
@@ -115,7 +115,7 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
       if (s.paused) return;
       const diff = s.target - s.current;
       if (Math.abs(diff) < 0.01) { s.current = s.target; if (++idle > 3) return; } else idle = 0; // sleep when still
-      s.current += diff * (lite ? 0.16 : 0.12);
+      s.current += diff * (reduced ? 1 : s.draggingMouse ? 0.24 : lite ? 0.16 : 0.12);
       if (ringRef.current) ringRef.current.style.transform = `translateZ(${-s.radius}px) rotateY(${s.current}deg)`;
       for (let i = 0; i < N; i++) {
         const rel = wrap180(i * STEP + s.current), f = Math.abs(rel) / 180;
@@ -150,18 +150,18 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
       el.animate([{ opacity: 0, transform: 'translateY(100%)' }, { opacity: 1, transform: 'none' }], { duration: 480, delay: i * 50, easing: EASE_OUT_EXPO, fill: 'backwards' }));
   }, [active, reduced]);
 
-  /* ── Drag: 1:1 follow, gentle inertia, max 1 card per flick ── */
+  /* ── Mouse spins with momentum; touch keeps direct drag control ── */
   const actions = useRef({ open: (_i: number) => {}, close: (_s: boolean) => {}, go, goToIndex });
   actions.current = { open: openModal, close: closeModal, go, goToIndex };
   useEffect(() => {
     const scene = sceneRef.current; if (!scene) return;
     const s = st.current;
-    let down = false, dragging = false, sx = 0, startRot = 0, pid = -1;
+    let down = false, dragging = false, mouseDrag = false, sx = 0, startRot = 0, pid = -1;
     let samples: { x: number; t: number }[] = [];
     const DEG_PER_PX = () => STEP / Math.max(180, (ringRef.current?.offsetWidth || 240) * 0.9); // one card ≈ one card-width of drag
     const onDown = (e: PointerEvent) => {
       if (e.button !== 0 || (e.target as HTMLElement).closest('button') || s.paused) return;
-      down = true; dragging = false; sx = e.clientX; pid = e.pointerId;
+      down = true; dragging = false; mouseDrag = e.pointerType === 'mouse'; sx = e.clientX; pid = e.pointerId;
       startRot = s.current; s.target = s.current;            // grab where it is right now (no jump)
       samples = [{ x: e.clientX, t: performance.now() }];
       e.preventDefault();
@@ -169,10 +169,10 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
     const onMove = (e: PointerEvent) => {
       if (!down || e.pointerId !== pid) return;
       const dx = e.clientX - sx;
-      if (!dragging && Math.abs(dx) > 5) { dragging = true; scene.setPointerCapture(pid); scene.classList.add('is-drag'); }
+      if (!dragging && Math.abs(dx) > 5) { dragging = true; s.draggingMouse = mouseDrag; scene.setPointerCapture(pid); scene.classList.add('is-drag'); }
       if (!dragging) return;
       s.target = startRot + dx * DEG_PER_PX();
-      s.current = s.target;                                  // 1:1 while dragging → no lag, no float
+      if (!mouseDrag) s.current = s.target;
       wake();
       const now = performance.now();
       samples.push({ x: e.clientX, t: now });
@@ -180,7 +180,7 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
     };
     const onUp = (e: PointerEvent) => {
       if (!down || e.pointerId !== pid) return;
-      down = false; scene.classList.remove('is-drag');
+      down = false; s.draggingMouse = false; scene.classList.remove('is-drag');
       if (scene.hasPointerCapture(pid)) scene.releasePointerCapture(pid);
       if (!dragging) {                                        // tap
         const el = (e.target as HTMLElement).closest('.ob-card');
@@ -192,19 +192,22 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
       dragging = false;
       const first = samples[0], last = samples[samples.length - 1];
       const v = (last.x - first.x) / Math.max(16, last.t - first.t); // px/ms over last ~90ms
-      const base = Math.round(s.target / STEP) * STEP;
-      let dest = base;
-      if (Math.abs(v) > 0.35) {                               // a real flick → move exactly one card in that direction
+      const base = snap(s.target);
+      if (mouseDrag && !reduced && e.type !== 'pointercancel') {
+        // Project the last flick into a short free spin, then settle on a card.
+        const glide = Math.max(-STEP * 3, Math.min(STEP * 3, v * 210 * DEG_PER_PX()));
+        s.target = snap(s.target + glide);
+      } else if (!reduced && Math.abs(v) > 0.35 && e.type !== 'pointercancel') {
         const dir = Math.sign(v * DEG_PER_PX());
-        const fromStart = Math.round(startRot / STEP) * STEP;
-        dest = Math.abs(base - fromStart) >= STEP ? base : fromStart + dir * STEP;
-      }
-      s.target = dest; wake();
+        const fromStart = snap(startRot);
+        s.target = Math.abs(base - fromStart) >= STEP ? base : fromStart + dir * STEP;
+      } else s.target = base;
+      wake();
     };
     let wheelLock = 0;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault(); if (s.paused) return;
-      const now = Date.now(); if (now - wheelLock < 450) return; wheelLock = now;
+      const now = Date.now(); if (now - wheelLock < 220) return; wheelLock = now;
       actions.current.go((e.deltaY + e.deltaX) > 0 ? -1 : 1);
     };
     const onKey = (e: KeyboardEvent) => {
@@ -227,7 +230,7 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
       scene.removeEventListener('lostpointercapture', onUp as EventListener); scene.removeEventListener('dragstart', noDrag);
       scene.removeEventListener('wheel', onWheel); window.removeEventListener('keydown', onKey);
     };
-  }, [STEP]); // bound ONCE — re-renders no longer reset the drag mid-gesture
+  }, [STEP, reduced]); // rebind only when the number of cards or motion preference changes
 
   /* ── Modal open / close (FLIP image) ── */
   function openModal(i: number) {
