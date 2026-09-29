@@ -21,7 +21,7 @@
 .ob-num{position:absolute;top:14px;inset-inline-start:16px;z-index:2;font:700 .75rem ui-monospace,monospace;opacity:.85;direction:ltr}
 .ob-name{position:absolute;bottom:18px;inset-inline-start:18px;z-index:2;font-weight:800;font-size:1.25rem}
 .ob-badge{position:absolute;bottom:20px;inset-inline-end:16px;z-index:2;font-weight:800;font-size:.75rem;background:#c9973f;color:#1a1614;padding:2px 9px;border-radius:99px;
-  opacity:0;transform:scale(.5);transition:.45s cubic-bezier(.34,1.56,.64,1)}
+  opacity:0;transform:scale(.5);transition:opacity .35s cubic-bezier(.16,1,.3,1),transform .35s cubic-bezier(.16,1,.3,1)}
 .ob-card.is-sel{outline:2px solid #c9973f;box-shadow:0 0 44px rgba(201,151,63,.28),0 40px 70px rgba(0,0,0,.6)}
 .ob-card.is-sel .ob-badge{opacity:1;transform:scale(1)}
 .ob-shade{position:absolute;inset:0;z-index:3;background:#0c0a09;opacity:0;pointer-events:none}
@@ -64,9 +64,9 @@
 .ob-chip{padding:0 14px;min-height:38px!important;min-width:0!important;border-radius:99px;border:1px solid #3a332e;background:#171311;color:#d6cfc5;font-size:.86rem;cursor:pointer;
   transition:background .25s,border-color .25s,color .25s;display:inline-flex;gap:6px;align-items:center}
 .ob-chip:hover{border-color:#5a5048}
-.ob-chip .t{width:0;overflow:hidden;transition:width .25s}
+.ob-chip .t{display:inline-flex;align-items:center;animation:ob-chip-check-in .22s cubic-bezier(.16,1,.3,1) both}
 .ob-chip.on{background:rgba(201,151,63,.14);border-color:#c9973f;color:#e6c58a}
-.ob-chip.on .t{width:.8em}
+@keyframes ob-chip-check-in{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
 .ob-mfoot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:14px;border-top:1px solid #2e2824;gap:1rem}
 .ob-mcount{color:#9b948b;font-size:.9rem}.ob-mcount b{color:#c9973f}
 .ob-mbtns{display:flex;gap:8px}

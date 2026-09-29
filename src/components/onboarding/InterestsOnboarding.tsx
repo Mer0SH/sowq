@@ -255,7 +255,7 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
     const seq: [string, number][] = [['h3', 450], ['.ob-msub', 520], ['.ob-mdesc', 590], ['.ob-group', 650], ['.ob-mfoot', 820]];
     seq.forEach(([sel, delay]) => modal.querySelectorAll(sel).forEach((el, k) =>
       el.animate([{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }], { duration: 750 * d, delay: (delay + k * 60) * d, easing: EASE_OUT_EXPO, fill: 'both' })));
-    modal.querySelector('.ob-close')?.animate([{ transform: 'scale(0) rotate(-90deg)' }, { transform: 'none' }], { duration: 600, delay: 700 * d, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'both' });
+    modal.querySelector('.ob-close')?.animate([{ transform: 'scale(0) rotate(-90deg)' }, { transform: 'none' }], { duration: 600, delay: 700 * d, easing: EASE_OUT_EXPO, fill: 'both' });
   }, [openIdx, lite, reduced]);
 
   function closeModal(save: boolean) {
@@ -302,9 +302,9 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
     requestAnimationFrame(() => {
       const d = doneRef.current; if (!d) return;
       d.animate([{ clipPath: 'circle(0% at 50% 100%)' }, { clipPath: 'circle(150% at 50% 100%)' }], { duration: 1100, easing: 'cubic-bezier(0.87, 0, 0.13, 1)', fill: 'both' });
-      d.querySelector('.ob-okring')?.animate([{ transform: 'scale(0) rotate(-180deg)' }, { transform: 'none' }], { duration: 800, delay: 800, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'both' });
+      d.querySelector('.ob-okring')?.animate([{ transform: 'scale(0) rotate(-180deg)' }, { transform: 'none' }], { duration: 800, delay: 800, easing: EASE_OUT_EXPO, fill: 'both' });
       d.querySelectorAll('h2, p').forEach((el, k) => el.animate([{ opacity: 0, transform: 'translateY(30px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: 950 + k * 100, easing: EASE_OUT_EXPO, fill: 'both' }));
-      d.querySelectorAll('.ob-tags span').forEach((el, k) => el.animate([{ opacity: 0, transform: 'translateY(14px) scale(.8)' }, { opacity: 1, transform: 'none' }], { duration: 500, delay: 1150 + k * 35, easing: 'cubic-bezier(.34,1.56,.64,1)', fill: 'both' }));
+      d.querySelectorAll('.ob-tags span').forEach((el, k) => el.animate([{ opacity: 0, transform: 'translateY(14px) scale(.8)' }, { opacity: 1, transform: 'none' }], { duration: 500, delay: 1150 + k * 35, easing: EASE_OUT_EXPO, fill: 'both' }));
       setTimeout(() => {
         rootRef.current?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 500, fill: 'forwards' }).addEventListener('finish', () => onDone(flat));
       }, 3000);
@@ -366,10 +366,10 @@ export default function InterestsOnboarding({ onDone }: { onDone: (picked: strin
                     <h4>{g.title}<button onClick={() => toggleGroup(g)}>{g.items.every(x => temp.has(x.id)) ? 'إلغاء' : 'الكل'}</button></h4>
                     <div className="ob-chips">
                       {g.items.map(x => (
-                        <button key={x.id} className={`ob-chip ${temp.has(x.id) ? 'on' : ''}`} onClick={e => {
+                        <button key={x.id} className={`ob-chip ${temp.has(x.id) ? 'on' : ''}`} aria-pressed={temp.has(x.id)} onClick={e => {
                           toggleChip(x.id);
-                          if (!reduced) (e.currentTarget as HTMLElement).animate([{ transform: 'scale(.88)' }, { transform: 'scale(1.04)' }, { transform: 'none' }], { duration: 420, easing: 'ease-out' });
-                        }}><span className="t"><Check size={12} /></span>{x.name}</button>
+                          if (!reduced) (e.currentTarget as HTMLElement).animate([{ transform: 'scale(.96)' }, { transform: 'none' }], { duration: 180, easing: EASE_OUT_EXPO });
+                        }}>{temp.has(x.id) && <span className="t" aria-hidden="true"><Check size={12} /></span>}{x.name}</button>
                       ))}
                     </div>
                   </div>
