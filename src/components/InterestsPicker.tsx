@@ -31,7 +31,7 @@ function groupsOf(node: CategoryNode): Group[] {
 export default function InterestsPicker({ open, onClose, onSaved }: {
   open: boolean;
   onClose: () => void;
-  onSaved?: (ids: string[]) => void;
+  onSaved?: (ids: string[]) => Promise<void> | void;
 }) {
   const { tree } = useCategories();
   const { products } = useCatalog();
@@ -44,6 +44,7 @@ export default function InterestsPicker({ open, onClose, onSaved }: {
 
   const [picks, setPicks] = useState<Record<string, Set<string>>>({});
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   /* Seed the draft from storage every time the sheet opens. */
   useEffect(() => {
@@ -109,15 +110,20 @@ export default function InterestsPicker({ open, onClose, onSaved }: {
     });
   }
 
-  function save() {
+  async function save() {
+    if (saving) return;
     const grouped: Record<string, string[]> = {};
     for (const [sectionId, ids] of Object.entries(picks)) if (ids.size) grouped[sectionId] = [...ids];
     const flat = Object.entries(grouped).flatMap(([sectionId, ids]) => [...ids]);
     // The flat list is the canonical stored shape; `onSaved` (the app context)
     // is what persists it, so the picker and the storefront never race.
-    showToast(flat.length ? 'تم تحديث اهتماماتك' : 'أُزيلت كل الاهتمامات', flat.length ? 'success' : 'info');
-    onSaved?.(flat);
-    onClose();
+    setSaving(true);
+    try {
+      await onSaved?.(flat);
+      showToast(flat.length ? 'تم تحديث اهتماماتك' : 'أُزيلت كل الاهتمامات', flat.length ? 'success' : 'info');
+      onClose();
+    } catch (error) { showToast((error as Error).message || 'تعذر حفظ الاهتمامات', 'error'); }
+    finally { setSaving(false); }
   }
 
   return (
@@ -229,7 +235,7 @@ export default function InterestsPicker({ open, onClose, onSaved }: {
           </p>
           <div className="flex gap-2">
             <button onClick={onClose} className="rounded-xl border border-border px-4 py-2.5 text-sm text-ink-soft transition-colors hover:border-border-strong">إلغاء</button>
-            <button onClick={save} className="rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand">حفظ الاهتمامات</button>
+            <button onClick={() => void save()} disabled={saving} className="rounded-xl bg-ink px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-brand disabled:opacity-60">{saving ? 'جارٍ الحفظ…' : 'حفظ الاهتمامات'}</button>
           </div>
         </footer>
       </div>

@@ -7,6 +7,7 @@ import ProductCard from '../components/ProductCard';
 import Floating from '../components/Floating';
 import CaseShowcase from '../components/CaseShowcase';
 import InterestsPicker from '../components/InterestsPicker';
+import { customerRequest } from '../services/customerAuth';
 import TiltCard from '../components/TiltCard';
 import { useReveal } from '../hooks/useReveal';
 import { startProductTransition } from '../services/motion';
@@ -33,7 +34,7 @@ function AnnouncementStrip({ items, follow }: { items: HomeContent['announcement
 
 export default function HomePage() {
   const { products } = useCatalog();
-  const { navigate, interests, setInterests, interestMatches } = useApp();
+  const { navigate, interests, setInterests, interestMatches, customer, refreshCustomerProfile } = useApp();
   const { tree: categories } = useCategories();
   const [home, setHome] = useState<HomeContent | null>(() => cachedHome);
   const [homeError, setHomeError] = useState('');
@@ -153,13 +154,18 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-          <button onClick={() => setPickerOpen(true)} className="press shrink-0 rounded-full border border-border px-5 py-2.5 text-sm font-bold text-ink transition-colors hover:border-brand hover:text-brand">
+          <button onClick={() => customer ? setPickerOpen(true) : navigate('login')} className="press shrink-0 rounded-full border border-border px-5 py-2.5 text-sm font-bold text-ink transition-colors hover:border-brand hover:text-brand">
             {interests.length ? 'تعديل اهتماماتي' : 'اختيار اهتماماتي'}
           </button>
         </div>
       </section>
 
-      <InterestsPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onSaved={setInterests} />
+      <InterestsPicker open={pickerOpen} onClose={() => setPickerOpen(false)} onSaved={async ids => {
+        if (!customer) throw new Error('سجّل الدخول أولًا.');
+        await customerRequest('/storefront/me/interests', customer, 'PUT', { interests: ids });
+        setInterests(ids);
+        await refreshCustomerProfile();
+      }} />
 
       {/* ── Hero with ghost word ────────────────────────────── */}
       <section className={`relative overflow-hidden pt-4 pb-[calc(88px+var(--app-safe-bottom))] sm:pt-16 sm:pb-24 ${darkHero ? 'text-white' : 'bg-canvas'}`} style={darkHero ? { background: 'radial-gradient(circle at 52% 35%, #2b5958 0%, #163b3b 45%, #0b2528 100%)' } : undefined}>

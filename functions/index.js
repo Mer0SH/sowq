@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { createHash, randomUUID } from 'node:crypto';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import { getStorage } from 'firebase-admin/storage';
 import { onRequest } from 'firebase-functions/v2/https';
 import { z } from 'zod';
@@ -10,6 +11,7 @@ import { categoryDescendants, currentPromotions, fail, publicProduct, quote } fr
 
 initializeApp();
 const db = getFirestore();
+const firebaseAuth = getAuth();
 const app = express();
 const apiRouter = express.Router();
 const ok = data => ({ ok: true, data });
@@ -46,6 +48,7 @@ const productSchema = z.object({
   is_featured: z.boolean().optional(), is_new: z.boolean().optional(),
 }).strict();
 const cartSchema = z.object({ items: z.array(z.object({ product_id: id, quantity: z.number().int().min(1).max(99) })).min(1).max(50), coupon: z.string().trim().toUpperCase().max(32).default('') });
+const interestsSchema = z.object({ interests: z.array(z.string().trim().min(1).max(120)).max(100) }).strict();
 const orderSchema = cartSchema.extend({
   name: z.string().trim().min(2).max(200), phone: z.string().trim().regex(/^\+?[0-9]{7,15}$/),
   city: z.string().trim().min(2).max(100), district: z.string().trim().max(100).default(''),
@@ -77,6 +80,41 @@ app.use('/api', (req, res, next) => {
 });
 app.use('/api/admin/media', express.raw({ type: 'image/*', limit: '6mb' }));
 app.use('/api', express.json({ limit: '100kb' }), apiRouter);
+
+async function requireCustomer(req, res, next) {
+  try {
+    const token = (req.headers.authorization || '').replace(/^Bearer /, '');
+    if (!token) throw fail(401, 'سجّل الدخول أولًا');
+    req.customer = await firebaseAuth.verifyIdToken(token);
+    next();
+  } catch (error) { console.error('Customer token verification failed', error?.code || '', error?.message || ''); send(res, 401, 'انتهت جلسة العميل. سجّل الدخول مجددًا.'); }
+}
+
+apiRouter.get('/storefront/me', requireCustomer, wrap(async (req, res) => {
+  const { uid, email, name } = req.customer;
+  const profileRef = ref('customer_profiles', uid);
+  const existing = (await profileRef.get()).data();
+  if (!existing) {
+    await profileRef.set({ uid, email: email || '', name: name || '', interests: [], onboarded: false, created_at: now(), updated_at: now() });
+  } else if (existing.email !== (email || '') || existing.name !== (name || '')) {
+    await profileRef.update({ email: email || '', name: name || '', updated_at: now() });
+  }
+  res.json(ok({ uid, email: email || '', name: name || '', interests: existing?.interests || [], onboarded: !!existing?.onboarded }));
+}));
+apiRouter.put('/storefront/me/interests', requireCustomer, wrap(async (req, res) => {
+  const { interests } = parse(interestsSchema, req.body);
+  const unique = [...new Set(interests)];
+  await ref('customer_profiles', req.customer.uid).set({
+    uid: req.customer.uid, email: req.customer.email || '', name: req.customer.name || '',
+    interests: unique, onboarded: true, updated_at: now(),
+  }, { merge: true });
+  res.json(ok({ interests: unique, onboarded: true }));
+}));
+apiRouter.delete('/storefront/me', requireCustomer, wrap(async (req, res) => {
+  await ref('customer_profiles', req.customer.uid).delete();
+  await firebaseAuth.deleteUser(req.customer.uid);
+  res.json(ok({ deleted: true }));
+}));
 
 async function audit(staffId, action, entity, entityId, changes) {
   const auditId = await nextId('audit_log');
@@ -132,6 +170,20 @@ apiRouter.post('/auth/login', wrap(async (req, res) => {
 }));
 apiRouter.post('/auth/logout', requireStaff(), wrap(async (req, res) => { await ref('sessions', tokenHash(req.token)).delete(); res.json(ok({ loggedOut: true })); }));
 apiRouter.get('/me', requireStaff(), wrap(async (req, res) => res.json(ok({ staff: { id: req.staff.id, name: req.staff.name, email: req.staff.email, role: req.staff.role, is_active: req.staff.is_active }, categories: [...(await allowedCategories(req.staff) || new Set())] }))));
+apiRouter.get('/customer-interests', requireStaff(['owner']), wrap(async (req, res) => {
+  const [customers, categories] = await Promise.all([all('customer_profiles'), all('categories')]);
+  const names = new Map(categories.map(c => [String(c.id), c.name]));
+  const counts = new Map();
+  for (const customer of customers) for (const interest of new Set(customer.interests || [])) {
+    counts.set(interest, (counts.get(interest) || 0) + 1);
+  }
+  res.json(ok({
+    total_customers: customers.length,
+    completed: customers.filter(c => c.onboarded).length,
+    interests: [...counts].map(([id, count]) => ({ id, name: names.get(String(id)) || id, count })).sort((a, b) => b.count - a.count),
+    customers: customers.map(c => ({ uid: c.uid, name: c.name || '', email: c.email || '', interests: (c.interests || []).map(id => names.get(String(id)) || id), onboarded: !!c.onboarded, created_at: c.created_at || '', updated_at: c.updated_at || '' })).sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at))),
+  }));
+}));
 
 apiRouter.get('/categories', wrap(async (req, res) => res.json(ok((await categoryRows()).filter(c => c.is_active)))));
 apiRouter.get('/admin/categories', requireStaff(['owner', 'catalog', 'support']), wrap(async (req, res) => {
@@ -453,4 +505,4 @@ app.use((error, req, res, next) => {
 });
 
 export { app };
-export const api = onRequest({ region: 'me-central1', invoker: 'public', memory: '512MiB', timeoutSeconds: 60, cors: ['https://localhost'] }, app);
+export const api = onRequest({ region: 'me-central1', invoker: 'public', memory: '512MiB', timeoutSeconds: 60, cors: ['https://localhost', 'http://localhost', 'capacitor://localhost', 'http://127.0.0.1:5190', 'http://localhost:5190'] }, app);

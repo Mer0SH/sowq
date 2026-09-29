@@ -17,6 +17,7 @@
     "@plasmicapp/host": "^2.0.19",
     "@plasmicapp/react-web": "^1.0.39",
     "@puckeditor/core": "^0.23.0",
+    "firebase": "^12.19.0",
     "lucide-react": "^1.47.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

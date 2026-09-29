@@ -4,7 +4,8 @@ import type { ReactNode } from 'react';
 import { AlertTriangle, Lock } from 'lucide-react';
 import { AppProvider } from './context/AppContext';
 import { useApp } from './context/useApp';
-import { isOnboarded, saveInterests } from './services/interests';
+import { saveInterests } from './services/interests';
+import { customerRequest } from './services/customerAuth';
 import { CategoryProvider } from './context/CategoryContext';
 import { CatalogProvider } from './context/CatalogContext';
 import Header from './components/Header';
@@ -17,6 +18,7 @@ import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import CheckoutPage from './pages/RealCheckoutPage';
 import AccountPage from './pages/CustomerAccountPage';
+import CustomerLoginPage from './pages/CustomerLoginPage';
 import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -67,18 +69,21 @@ function CheckoutHeader() {
 
 /* ── Router ──────────────────────────────────────────────────── */
 function OnboardingGate() {
-  const { currentPage, setInterests } = useApp();
-  const [show, setShow] = useState(() => {
-    if (new URLSearchParams(window.location.search).has('onboarding')) return true;
-    return !isOnboarded();
-  });
-  if (!show || currentPage === 'admin' || currentPage === 'checkout') return null;
-  return <InterestsOnboarding onDone={(picked) => {
-    // The onboarding result used to be dropped on the floor — the store now
-    // receives it, persists it and re-ranks its sections around it.
-    if (picked.length) setInterests(picked);
-    saveInterests(picked);
-    setShow(false);
+  const { currentPage, customer, customerProfile, authReady, setInterests, refreshCustomerProfile, showToast } = useApp();
+  const [saving, setSaving] = useState(false);
+  const [forced, setForced] = useState(() => new URLSearchParams(window.location.search).has('onboarding'));
+  if (!authReady || !customer || !customerProfile || (customerProfile.onboarded && !forced) || ['admin', 'login', 'checkout'].includes(currentPage)) return null;
+  return <InterestsOnboarding onDone={async (picked) => {
+    if (saving) return;
+    setSaving(true);
+    try {
+      await customerRequest('/storefront/me/interests', customer, 'PUT', { interests: picked });
+      setInterests(picked);
+      saveInterests(picked);
+      await refreshCustomerProfile();
+      if (forced) { window.history.replaceState(window.history.state, '', window.location.pathname); setForced(false); }
+    } catch { showToast('تعذر حفظ الاهتمامات. حاول مجددًا.', 'error'); }
+    finally { setSaving(false); }
   }} />;
 }
 
@@ -98,6 +103,7 @@ function Router() {
         {currentPage === 'product-detail' && <ProductDetailPage />}
         {currentPage === 'checkout'       && <CheckoutPage />}
         {currentPage === 'account'        && <AccountPage />}
+        {currentPage === 'login'          && <CustomerLoginPage />}
         {currentPage === 'admin'          && <AdminPage />}
         {currentPage === '404'            && <NotFoundPage />}
       </div>

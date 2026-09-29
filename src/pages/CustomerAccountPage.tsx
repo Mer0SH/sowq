@@ -5,12 +5,13 @@ import { useCatalog } from '../context/CatalogContext';
 import ProductCard from '../components/ProductCard';
 import type { CustomerOrder } from '../services/storefrontApi';
 import { formatPrice, mediaUrl, storefrontRequest } from '../services/storefrontApi';
+import { customerAuth, signOut } from '../services/customerAuth';
 
 type SavedOrder = { id: number; token: string };
 const statuses: Record<string, string> = { new: 'جديد', processing: 'قيد التجهيز', shipped: 'تم الشحن', delivered: 'تم التسليم', cancelled: 'ملغي' };
 
 export default function CustomerAccountPage() {
-  const { navigate, favorites } = useApp();
+  const { navigate, favorites, customerProfile, clearCart } = useApp();
   const { products } = useCatalog();
   const [tab, setTab] = useState<'orders' | 'favorites'>('orders');
   const [orders, setOrders] = useState<CustomerOrder[]>([]);
@@ -33,7 +34,8 @@ export default function CustomerAccountPage() {
   }, [version]);
   const favoriteProducts = products.filter(product => favorites.includes(product.id));
   return <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 pb-8 sm:pb-16">
-    <div className="flex items-center justify-between gap-3"><div><span className="text-xs font-bold text-[#8d7659]">متابعة مشترياتك</span><h1 className="text-3xl font-black text-ink mt-1">حسابي</h1></div><button onClick={() => setVersion(value => value + 1)} className="inline-flex items-center gap-2 text-sm text-brand border border-border bg-white rounded-xl px-4 py-2"><RefreshCw size={15} /> تحديث</button></div>
+    <div className="flex items-center justify-between gap-3"><div><span className="text-xs font-bold text-[#8d7659]">متابعة مشترياتك</span><h1 className="text-3xl font-black text-ink mt-1">حسابي</h1><p className="mt-1 text-sm text-muted">{customerProfile?.name || customerProfile?.email}</p></div><button onClick={() => setVersion(value => value + 1)} className="inline-flex items-center gap-2 text-sm text-brand border border-border bg-white rounded-xl px-4 py-2"><RefreshCw size={15} /> تحديث</button></div>
+    <div className="mt-5 flex flex-wrap gap-3"><button onClick={() => window.location.assign('/?onboarding')} className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-bold">تعديل اهتماماتي</button><button onClick={() => { void signOut(customerAuth).then(() => { clearCart(); navigate('home'); }); }} className="rounded-xl border border-border bg-white px-4 py-2.5 text-sm font-bold">تسجيل الخروج</button></div>
     <p className="text-sm text-muted mt-2">تظهر الطلبات المسجلة من هذا الجهاز. احتفظ برقم الطلب عند التواصل مع المتجر.</p>
     <button onClick={() => navigate('admin')} className="mt-5 w-full min-h-12 rounded-xl border border-border bg-white px-5 py-3 text-right text-sm font-bold text-ink">دخول الموظفين والإدارة <span className="float-left text-muted">‹</span></button>
     <div className="flex gap-2 border-b border-border mt-8 mb-7"><button onClick={() => setTab('orders')} className={`flex items-center gap-2 px-5 py-3 text-sm ${tab === 'orders' ? 'border-b-2 border-brand font-bold text-ink' : 'text-muted'}`}><Package size={17} /> طلباتي</button><button onClick={() => setTab('favorites')} className={`flex items-center gap-2 px-5 py-3 text-sm ${tab === 'favorites' ? 'border-b-2 border-brand font-bold text-ink' : 'text-muted'}`}><Heart size={17} /> المفضلة</button></div>

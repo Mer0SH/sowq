@@ -23,8 +23,7 @@ export default function ProductCard({ product, size = 'md' }: Props) {
   function handleAddToCart(e: React.MouseEvent) {
     e.stopPropagation();
     if (isOut) return;
-    addToCart({ product, quantity: 1 });
-    showToast(`تمت إضافة "${product.name}" إلى السلة`);
+    if (addToCart({ product, quantity: 1 })) showToast(`تمت إضافة "${product.name}" إلى السلة`);
   }
 
   function handleToggleFav(e: React.MouseEvent) {

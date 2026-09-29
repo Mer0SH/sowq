@@ -11,14 +11,15 @@ import OrderPanel from '../components/admin/OrderPanel';
 import PromotionsPanel from '../components/admin/PromotionsPanel';
 import HomeEditor from '../components/admin/HomeEditor';
 import ProductWorkspace from '../components/admin/ProductWorkspace';
+import CustomerInterestsPanel from '../components/admin/CustomerInterestsPanel';
 import { Empty, Field, Status, date, money, num, roles, roleDescriptions, statusLabels } from '../components/admin/ui';
 import './admin.css';
 import './admin-theme.css';
 
-type Tab = 'overview' | 'products' | 'categories' | 'promotions' | 'home' | 'orders' | 'staff' | 'audit';
-const tabs = [ { id: 'overview', name: 'نظرة عامة', icon: LayoutDashboard }, { id: 'products', name: 'المنتجات', icon: Package }, { id: 'categories', name: 'الأقسام', icon: Layers }, { id: 'promotions', name: 'العروض والتخفيضات', icon: BadgePercent }, { id: 'home', name: 'تصميم الرئيسية', icon: PanelsTopLeft }, { id: 'orders', name: 'الطلبات', icon: ShoppingBag }, { id: 'staff', name: 'الموظفون والصلاحيات', icon: Users }, { id: 'audit', name: 'سجل التعديلات', icon: History } ] as const;
-const roleTabs: Record<Role, Tab[]> = { owner: ['overview', 'products', 'categories', 'promotions', 'home', 'orders', 'staff', 'audit'], catalog: ['overview', 'products', 'categories'], support: ['overview', 'orders', 'products'], fulfillment: ['overview', 'orders'], accountant: ['overview', 'orders'] };
-const pageDescriptions: Record<Tab, string> = { overview: '', products: 'كتالوج بصور واضحة وأسعار ومخزون مباشر.', categories: 'رتّب منتجاتك في أقسام وفروع سهلة التصفح.', promotions: 'خطّط الخصومات وحدد المنتجات ووقت ظهورها.', home: 'حرّر بداية المتجر والبنرات وشريط الإعلانات ثم انشرها.', orders: 'من الطلب الجديد حتى التسليم، تابع كل خطوة.', staff: 'لكل شخص دوره، ولكل دور صلاحياته.', audit: 'من غيّر ماذا ومتى؟ كل العمليات في سجل واحد.' };
+type Tab = 'overview' | 'products' | 'categories' | 'promotions' | 'home' | 'orders' | 'interests' | 'staff' | 'audit';
+const tabs = [ { id: 'overview', name: 'نظرة عامة', icon: LayoutDashboard }, { id: 'products', name: 'المنتجات', icon: Package }, { id: 'categories', name: 'الأقسام', icon: Layers }, { id: 'promotions', name: 'العروض والتخفيضات', icon: BadgePercent }, { id: 'home', name: 'تصميم الرئيسية', icon: PanelsTopLeft }, { id: 'orders', name: 'الطلبات', icon: ShoppingBag }, { id: 'interests', name: 'اهتمامات العملاء', icon: ChartNoAxesCombined }, { id: 'staff', name: 'الموظفون والصلاحيات', icon: Users }, { id: 'audit', name: 'سجل التعديلات', icon: History } ] as const;
+const roleTabs: Record<Role, Tab[]> = { owner: ['overview', 'products', 'categories', 'promotions', 'home', 'orders', 'interests', 'staff', 'audit'], catalog: ['overview', 'products', 'categories'], support: ['overview', 'orders', 'products'], fulfillment: ['overview', 'orders'], accountant: ['overview', 'orders'] };
+const pageDescriptions: Record<Tab, string> = { overview: '', products: 'كتالوج بصور واضحة وأسعار ومخزون مباشر.', categories: 'رتّب منتجاتك في أقسام وفروع سهلة التصفح.', promotions: 'خطّط الخصومات وحدد المنتجات ووقت ظهورها.', home: 'حرّر بداية المتجر والبنرات وشريط الإعلانات ثم انشرها.', orders: 'من الطلب الجديد حتى التسليم، تابع كل خطوة.', interests: 'تعرف على الأقسام التي يفضلها عملاؤك.', staff: 'لكل شخص دوره، ولكل دور صلاحياته.', audit: 'من غيّر ماذا ومتى؟ كل العمليات في سجل واحد.' };
 const roleIcons = { owner: ShieldCheck, catalog: Package, support: Headphones, fulfillment: Truck, accountant: ChartNoAxesCombined };
 const pageSize = 10;
 const actionLabels: Record<string, string> = { create: 'إضافة', update: 'تعديل', update_status: 'تحديث الحالة' };
@@ -118,7 +119,7 @@ export default function AdminPage() {
   function closeMenu() { if (window.history.state?.adminDrawer) window.history.back(); else { drawerHistoryRef.current = false; setMobileMenu(false); } }
   useEffect(() => {
     if (!staff) return;
-    if (tab === 'promotions' || tab === 'home') { setLoading(false); setError(''); return; }
+    if (tab === 'promotions' || tab === 'home' || tab === 'interests') { setLoading(false); setError(''); return; }
     const controller = new AbortController(); const generation = sessionGeneration.current;
     setLoading(true); setError('');
     const load = async () => {
@@ -210,7 +211,7 @@ export default function AdminPage() {
     <div className="admin-workspace"><header className="admin-topbar"><div><button ref={menuTriggerRef} className="admin-mobile-toggle admin-icon" aria-label="فتح القائمة" aria-expanded={mobileMenu} onClick={openMenu}><Menu size={21} /></button><span>مساحة {roles[staff.role]}</span><ChevronLeft size={14} /><b>{tabs.find(t => t.id === tab)?.name}</b></div><span className="admin-today">{new Date().toLocaleDateString('ar-YE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Asia/Aden' })}</span></header>
     <main className={`admin-main ${tab === 'staff' ? 'admin-staff-page' : ''}`}><div className="admin-heading"><div><span className="admin-kicker">{tab === 'overview' ? 'يوم جديد، إنجاز جديد' : 'متجر سوق'}</span><h1>{tab === 'overview' ? `أهلًا، ${staff.name}` : tabs.find(t => t.id === tab)?.name}</h1><p>{tab === 'overview' ? roleDescriptions[staff.role] : pageDescriptions[tab]}</p></div><div className="admin-heading-actions"><button className="admin-icon bordered admin-theme-toggle" onClick={toggleTheme} aria-label={theme === 'light' ? 'تفعيل الوضع الليلي' : 'تفعيل الوضع الفاتح'} title={theme === 'light' ? 'الوضع الليلي' : 'الوضع الفاتح'}>{theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}</button><button className="admin-icon bordered" onClick={() => setRevision(v => v + 1)} disabled={loading} aria-label="تحديث البيانات"><RefreshCw size={18} className={loading ? 'animate-spin' : ''} /></button>{addLabel && <button className="admin-btn" disabled={loading || !!error} onClick={() => setEditor({ kind: tab === 'products' ? 'product' : tab === 'categories' ? 'category' : 'staff' })}><Plus size={18} />{addLabel}</button>}</div></div>
     {error && <div className="admin-alert error" role="alert">{error}<button className="admin-text-btn" onClick={() => setRevision(v => v + 1)}>إعادة المحاولة</button></div>}{notice && <div className="admin-alert success" role="status">{notice}</div>}
-    {loading ? <div role="status" aria-label="جارٍ تحميل البيانات" className="admin-skeleton"><div className="skeleton" /><div className="skeleton" /><div className="skeleton" /></div> : !error && (tab === 'promotions' ? <PromotionsPanel token={token} /> : tab === 'home' ? <HomeEditor token={token} /> : tab === 'overview' ? <>
+    {loading ? <div role="status" aria-label="جارٍ تحميل البيانات" className="admin-skeleton"><div className="skeleton" /><div className="skeleton" /><div className="skeleton" /></div> : !error && (tab === 'promotions' ? <PromotionsPanel token={token} /> : tab === 'home' ? <HomeEditor token={token} /> : tab === 'interests' ? <CustomerInterestsPanel token={token} /> : tab === 'overview' ? <>
       <div className="admin-stats">{[
         { label: 'طلبات جديدة', value: dashboard?.new_orders, icon: ShoppingBag, caption: 'بانتظار بدء التجهيز', go: () => selectTab('orders', 'new'), tone: 'gold' },
         { label: 'طلبات متأخرة', value: dashboard?.delayed_orders, icon: Clock3, caption: 'لم تُشحن خلال 48 ساعة', go: () => selectTab('orders', 'delayed'), tone: 'orange' },

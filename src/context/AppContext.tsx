@@ -3,6 +3,8 @@ import type { Product } from '../data/products';
 import { AppContext } from './AppContextValue';
 import { setSystemBarsDark } from '../services/systemBars';
 import { readInterests, saveInterests, expandInterests } from '../services/interests';
+import { customerAuth, customerRequest, onAuthStateChanged } from '../services/customerAuth';
+import type { CustomerProfile, User } from '../services/customerAuth';
 
 /* ── Types ─────────────────────────────────────────────── */
 
@@ -12,6 +14,7 @@ export type Page =
   | 'product-detail'
   | 'checkout'
   | 'account'
+  | 'login'
   | 'admin'
   | '404';
 
@@ -84,7 +87,7 @@ export type AppContextType = {
   navigate: (page: Page, params?: NavParams) => void;
 
   cartItems: CartItem[];
-  addToCart: (item: CartItem) => void;
+  addToCart: (item: CartItem) => boolean;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, qty: number) => void;
   clearCart: () => void;
@@ -110,6 +113,11 @@ export type AppContextType = {
 
   isLoggedIn: boolean;
   setIsLoggedIn: (v: boolean) => void;
+  customer: User | null;
+  customerProfile: CustomerProfile | null;
+  authReady: boolean;
+  refreshCustomerProfile: () => Promise<void>;
+  continueAfterLogin: () => void;
 };
 
 // This component has its own Fast Refresh boundary; the context object lives in AppContextValue.
@@ -126,6 +134,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [customer, setCustomer] = useState<User | null>(null);
+  const [customerProfile, setCustomerProfile] = useState<CustomerProfile | null>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const [pendingCartItem, setPendingCartItem] = useState<CartItem | null>(null);
+  const [returnPage, setReturnPage] = useState<Page>('home');
+  const [returnParams, setReturnParams] = useState<NavParams>({});
   /* Kept in sync with `souq-interests` so onboarding, the picker and the
      personalised home sections share one source of truth. */
   const [interests, setInterestsState] = useState<string[]>(() => readInterests());
@@ -137,6 +151,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setInterestMatches([...expandInterests(ids)]);
     saveInterests(ids);
   }, []);
+  const refreshCustomerProfile = useCallback(async () => {
+    const user = customerAuth.currentUser;
+    if (!user) return;
+    const profile = await customerRequest<CustomerProfile>('/storefront/me', user);
+    setCustomerProfile(profile);
+    if (profile.interests.length) {
+      setInterestsState(profile.interests);
+      setInterestMatches([...expandInterests(profile.interests)]);
+      saveInterests(profile.interests);
+    }
+  }, []);
+  useEffect(() => onAuthStateChanged(customerAuth, async user => {
+    setCustomer(user);
+    if (!user) { setCustomerProfile(null); setAuthReady(true); return; }
+    try { await refreshCustomerProfile(); } catch { setCustomerProfile(null); }
+    setAuthReady(true);
+  }), [refreshCustomerProfile]);
 
   useEffect(() => { if (currentPage !== 'admin') setSystemBarsDark(false); }, [currentPage]);
   useEffect(() => {
@@ -172,6 +203,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const navigate = useCallback((page: Page, params: NavParams = {}) => {
+    if ((page === 'checkout' || page === 'account') && !customerAuth.currentUser) {
+      setReturnPage(page); page = 'login';
+      setReturnParams(params);
+    }
     const previous = window.history.state as { souqPage?: Page; souqParams?: NavParams; souqIndex?: number } | null;
     const sameStorePage = page !== 'admin' && previous?.souqPage === page && JSON.stringify(previous.souqParams || {}) === JSON.stringify(params);
     if (page === 'admin' && !/^\/admin(?:\/|$)/.test(window.location.pathname)) {
@@ -186,9 +221,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
+  const continueAfterLogin = useCallback(() => {
+    if (pendingCartItem) {
+      dispatch({ type: 'ADD', payload: pendingCartItem });
+      setPendingCartItem(null);
+      setIsCartOpen(true);
+    }
+    navigate(returnPage, returnParams);
+    setReturnPage('home');
+    setReturnParams({});
+  }, [navigate, pendingCartItem, returnPage, returnParams]);
+
   const addToCart = useCallback((item: CartItem) => {
+    if (!customerAuth.currentUser) {
+      setPendingCartItem(item);
+      setReturnPage(currentPage);
+      setReturnParams(navParams);
+      navigate('login');
+      return false;
+    }
     dispatch({ type: 'ADD', payload: item });
-  }, []);
+    return true;
+  }, [currentPage, navParams, navigate]);
 
   const removeFromCart = useCallback((productId: string) => {
     dispatch({ type: 'REMOVE', payload: productId });
@@ -257,6 +311,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         interestMatches,
         isLoggedIn,
         setIsLoggedIn,
+        customer,
+        customerProfile,
+        authReady,
+        refreshCustomerProfile,
+        continueAfterLogin,
       }}
     >
       {children}

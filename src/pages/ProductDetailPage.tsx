@@ -48,7 +48,7 @@ export default function ProductDetailPage() {
     setSizeError(false);
 
     if (addedToCart) return;
-    addToCart({ product, quantity, selectedColor, selectedSize });
+    if (!addToCart({ product, quantity, selectedColor, selectedSize })) return;
     setAddedToCart(true);
     showToast(`تمت إضافة "${product.name}" إلى السلة`);
     setTimeout(() => setAddedToCart(false), 2000);
